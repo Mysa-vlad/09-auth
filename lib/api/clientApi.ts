@@ -81,6 +81,8 @@ export async function logout(): Promise<void> {
 
 export interface CheckSessionResponse {
   success: boolean;
+  accessToken?: string;
+  refreshToken?: string
 }
 
 export async function checkSession(): Promise<CheckSessionResponse> {

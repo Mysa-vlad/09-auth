@@ -1,32 +1,8 @@
-// import { fetchNoteById } from '../../../lib/api'
-// import NoteDetailsClient from './NoteDetails.client'
-// import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query'
+import { Metadata } from "next";
+import { fetchNoteById } from "@/lib/api/serverApi";
+import { HydrationBoundary, QueryClient, dehydrate } from '@tanstack/react-query';
+import NoteDetailsClient from './NoteDetails.client';
 
-// interface Props {
-//   params: Promise<{ id: string }>
-// }
-
-// const NoteDetailsPage = async ({ params }: Props) => {
-//   const { id } = await params
-
-//   const queryClient = new QueryClient()
-
-//   queryClient.prefetchQuery({
-//     queryKey: ['note', id],
-//     queryFn: () => fetchNoteById(id),
-//   })
-
-//   // const noteItem = await getNoteItem(id)
-
-//   return (
-//     <div>
-//       <HydrationBoundary state={dehydrate(queryClient)}>
-//         {/* <NoteDetailsPageClient noteId={id} /> */}
-//         <NoteDetailsClient />
-//       </HydrationBoundary>
-//     </div>
-//   )
-// }
 interface Props {
   params: Promise<{ id: string }>;
 }
@@ -36,6 +12,7 @@ export const generateMetadata = async ({
 }: Props): Promise<Metadata> => {
   const { id } = await params;
   const note = await fetchNoteById(id);
+  
   return {
     title: note.title,
     description: note.content,
@@ -54,12 +31,24 @@ export const generateMetadata = async ({
     },
   };
 };
-import { fetchNoteById } from "@/lib/api/serverApi";
-import { Metadata } from "next";
-import { redirect } from "next/navigation";
 
-const Notes = async () => {
-  redirect("/notes/filter/all");
+const NoteDetailsPage = async ({ params }: Props) => {
+  const { id } = await params;
+
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery({
+    queryKey: ['note', id],
+    queryFn: () => fetchNoteById(id),
+  });
+
+  return (
+    <div>
+      <HydrationBoundary state={dehydrate(queryClient)}>
+        <NoteDetailsClient /> 
+      </HydrationBoundary>
+    </div>
+  );
 };
 
-export default Notes;
+export default NoteDetailsPage;

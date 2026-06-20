@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { nextServer } from "./api";
 import type { Note } from "../../types/note";
+import type { AxiosResponse } from "axios";
 import type { User } from "../../types/user";
 import type {
   FetchNotesParams,
@@ -52,12 +53,21 @@ export async function getMe(): Promise<User> {
   return response.data;
 }
 
-export async function checkSession(): Promise<CheckSessionResponse> {
+// export async function checkSession(): Promise<CheckSessionResponse> {
+//   const cookieStore = await cookies();
+//   const response = await nextServer.get<CheckSessionResponse>("/auth/session", {
+//     headers: {
+//       Cookie: cookieStore.toString(),
+//     },
+//   });
+//   return response.data;
+// }
+export async function checkSession(): Promise<AxiosResponse<CheckSessionResponse>> {
   const cookieStore = await cookies();
   const response = await nextServer.get<CheckSessionResponse>("/auth/session", {
     headers: {
       Cookie: cookieStore.toString(),
     },
   });
-  return response.data;
+  return response; 
 }
