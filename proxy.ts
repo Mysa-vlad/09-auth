@@ -12,31 +12,37 @@ export async function proxy(request: NextRequest) {
   let accessToken = cookieStore.get("accessToken")?.value;
   let refreshToken = cookieStore.get("refreshToken")?.value;
 
-  const response = NextResponse.next();
+  const cookiesToSet: { name: string; value: string }[] = [];
+  const cookiesToDelete: string[] = [];
 
   if (!accessToken && refreshToken) {
     try {
-      const sessionResponse = await checkSession(); 
-  const newTokens = sessionResponse.data;
+      const sessionResponse = await checkSession();
+      const newTokens = sessionResponse?.data;
 
       if (newTokens?.accessToken) {
         accessToken = newTokens.accessToken;
+        cookiesToSet.push({ name: "accessToken", value: accessToken });
 
-
-        response.cookies.set("accessToken", accessToken);
-        
         if (newTokens.refreshToken) {
           refreshToken = newTokens.refreshToken;
-          response.cookies.set("refreshToken", refreshToken);
+          cookiesToSet.push({ name: "refreshToken", value: refreshToken });
         }
+      } else {
+
+        cookiesToDelete.push("refreshToken");
+        refreshToken = undefined;
       }
     } catch (error) {
       console.error("Помилка під час оновлення сесії:", error);
-
+    
+      cookiesToDelete.push("refreshToken");
+      refreshToken = undefined;
     }
   }
 
-  const isAuthenticated = Boolean(accessToken || refreshToken);
+
+  const isAuthenticated = Boolean(accessToken);
 
   const isPrivateRoute = privateRoutes.some((route) =>
     pathname.startsWith(route)
@@ -46,13 +52,23 @@ export async function proxy(request: NextRequest) {
   );
 
 
+  let response = NextResponse.next();
+
   if (!isAuthenticated && isPrivateRoute) {
-    return NextResponse.redirect(new URL("/sign-in", request.url));
+
+    response = NextResponse.redirect(new URL("/sign-in", request.url));
+  } else if (isAuthenticated && isPublicRoute) {
+    response = NextResponse.redirect(new URL("/profile", request.url));
   }
 
-  if (isAuthenticated && isPublicRoute) {
-    return NextResponse.redirect(new URL("/profile", request.url));
-  }
+
+  cookiesToSet.forEach(({ name, value }) => {
+    response.cookies.set(name, value);
+  });
+
+  cookiesToDelete.forEach((name) => {
+    response.cookies.delete(name);
+  });
 
   return response;
 }
