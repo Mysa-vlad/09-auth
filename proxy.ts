@@ -58,7 +58,7 @@ export async function proxy(request: NextRequest) {
 
     response = NextResponse.redirect(new URL("/sign-in", request.url));
   } else if (isAuthenticated && isPublicRoute) {
-    response = NextResponse.redirect(new URL("/profile", request.url));
+    response = NextResponse.redirect(new URL("/", request.url));
   }
 
 
