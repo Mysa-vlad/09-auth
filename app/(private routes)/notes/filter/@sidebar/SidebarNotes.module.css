@@ -1,0 +1,32 @@
+.sidebar {
+  padding: 20px;
+  border-right: 1px solid #ddd;
+  min-height: 100vh;
+  background-color: #292929;
+}
+
+.menuList {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menuItem {
+  margin-bottom: 12px;
+}
+
+.menuLink {
+  text-decoration: none;
+  color: #fff;
+  font-size: 14px;
+  display: block;
+  padding: 10px 16px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  border-left: 3px solid transparent;
+}
+
+.menuLink:hover {
+  background-color: #444;
+}
+
